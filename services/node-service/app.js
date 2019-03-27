@@ -3,6 +3,7 @@ const request = require('request-promise')
 const app = express();
 
 // Unless configured otherwise, the hostname is simply the service name
+// Bump 1
 const goServiceEndpoint = `http://go-service/hello-go`;
 
 app.get('/hello-node', (req, res) => res.send('Hello from Node service!'));
