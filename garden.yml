@@ -1,0 +1,34 @@
+kind: Project
+name: ci-demo-project
+environments:
+  - name: local
+    providers:
+      - name: local-kubernetes
+  - name: preview
+    providers:
+      - name: kubernetes
+        context: my-preview-cluster
+        defaultHostname: ci-demo-project-${local.env.CIRCLE_BRANCH || "default"}.preview.my-domain
+        namespace: ci-demo-project-${local.env.CIRCLE_BRANCH || "default"}
+        deploymentRegistry:
+          # The hostname of the registry, e.g. gcr.io for GCR (Google Container Registry)
+          hostname: my-registry-hostname
+          # Namespace to use in the registry for this project. For GCR, use the project ID where your cluster is.
+          namespace: my-registry-namespace
+  - name: staging
+    providers:
+      - name: kubernetes
+        context: my-staging-cluster
+        namespace: ci-demo-project
+        defaultHostname: ci-demo-project.staging.my-domain # change this to the hostname that points to your cluster
+        forceSsl: true
+        tlsCertificates:
+        - name: staging-tls
+          secretRef:
+            name: staging-tls
+            namespace: default
+        deploymentRegistry:
+          # The hostname of the registry, e.g. gcr.io for GCR (Google Container Registry)
+          hostname: my-registry-hostname
+          # Namespace to use in the registry for this project. For GCR, use the project ID where your cluster is.
+          namespace: my-registry-namespace
