@@ -3,14 +3,13 @@ const request = require('request-promise')
 const app = express();
 
 // Unless configured otherwise, the hostname is simply the service name
-// Bump 1
-const goServiceEndpoint = `http://go-service/hello-go`;
+const backendEndpoint = `http://backend/hello-go`;
 
-app.get('/hello-node', (req, res) => res.send('Hello from Node service!'));
+app.get('/hello-frontend', (req, res) => res.send('Hello from fromtend'));
 
-app.get('/call-go-service', (req, res) => {
-  // Query the go-service and return the response
-  request.get(goServiceEndpoint)
+app.get('/call-backend', (req, res) => {
+  // Query the backend and return the response
+  request.get(backendEndpoint)
     .then(message => {
       message = `Go says: '${message}'`
       res.json({
@@ -21,7 +20,7 @@ app.get('/call-go-service', (req, res) => {
       res.statusCode = 500
       res.json({
         error: err,
-        message: "Unable to reach service at " + goServiceEndpoint,
+        message: "Unable to reach service at " + backendEndpoint,
       })
     });
 });

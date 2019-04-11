@@ -1,18 +1,6 @@
 # CircleCI 2.1 configuration file
 version: 2.1
 
-# Shared config to use between jobs
-# These can be used to inject shared variables
-# see https://blog.daemonl.com/2016/02/yaml.html
-.references:
-  # Configuration for our Garden jobs
-  image-config: &image-config
-    docker:
-      - image: gardendev/garden:v0.10.0-0
-
-# Reuseable commands to execute in jobs
-# see https://circleci.com/docs/2.0/configuration-reference/#commands-requires-version21
-# and example https://github.com/mapbox/mapbox-gl-native/blob/master/circle.yml
 commands:
   # This step will depend on how you've set up your remote cluster
   configure_kubectl_context:
@@ -26,50 +14,29 @@ commands:
             $HOME/gcloud/google-cloud-sdk/install.sh --quiet
             echo 'export PATH=$HOME/gcloud/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
       - run:
-          name: Configure kubectl context via gloud
+          name: Configure kubectl context via gcloud
           command: |
             gcloud --quiet components update
             echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project $GOOGLE_PROJECT_ID && gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE
             gcloud --quiet container clusters get-credentials $GOOGLE_CLUSTER_ID --zone $GOOGLE_COMPUTE_ZONE
 
-#
-# Jobs section
-#
 jobs:
   preview:
-    <<: *image-config
+    docker:
+      - image: gardendev/garden:v0.10.0-0
     steps:
       - checkout
       - configure_kubectl_context
       - run:
           name: Test project
-          command: GARDEN_LOGGER_TYPE=basic garden test --env=preview
+          command: garden test --logger-type=basic --env=preview
       - run:
           name: Deploy project
-          command: GARDEN_LOGGER_TYPE=basic garden deploy --env=preview
-  staging:
-    <<: *image-config
-    steps:
-      - checkout
-      - configure_kubectl_context
-      - run:
-          name: Test project
-          command: garden test --logger-type=basic --env=staging
-      - run:
-          name: Deploy project
-          command: garden deploy --logger-type=basic --env=staging
+          command: garden deploy --logger-type=basic --env=preview
 
 workflows:
   version: 2
   commit:
     jobs:
       - preview
-  master:
-    jobs:
-      - staging:
-          filters:
-            branches:
-              only: master
-            tags:
-              ignore: /.*/

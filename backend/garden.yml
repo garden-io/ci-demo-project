@@ -1,0 +1,13 @@
+kind: Module
+name: backend
+description: A Golang backend service
+type: container
+services:
+  - name: backend
+    ports:
+      - name: http
+        containerPort: 8080
+        servicePort: 80
+tests:
+  - name: unit
+    args: [go, test, ./webserver]

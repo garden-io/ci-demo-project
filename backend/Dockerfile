@@ -1,7 +1,6 @@
 FROM golang:1.8.3-alpine
-MAINTAINER Aurelien PERRIER <a.perrier89@gmail.com>
 
-ENV webserver_path /go/src/github.com/perriea/webserver/
+ENV webserver_path /go/src/github.com/garden-io/ci-demo-project/webserver/
 ENV PATH $PATH:$webserver_path
 
 WORKDIR $webserver_path

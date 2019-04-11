@@ -1,0 +1,18 @@
+kind: Module
+name: frontend
+description: A Nodejs frontend service
+type: container
+services:
+  - name: frontend
+    ports:
+      - name: http
+        containerPort: 8080
+    dependencies:
+      - backend
+tests:
+  - name: unit
+    args: [npm, test]
+  - name: integ
+    args: [npm, run, integ]
+    dependencies:
+      - backend
