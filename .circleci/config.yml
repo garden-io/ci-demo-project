@@ -8,35 +8,15 @@ version: 2.1
   # Configuration for our Garden jobs
   image-config: &image-config
     docker:
-      - image: circleci/buildpack-deps:stretch
+      - image: gardendev/garden:v0.10.0-0
 
 # Reuseable commands to execute in jobs
 # see https://circleci.com/docs/2.0/configuration-reference/#commands-requires-version21
 # and example https://github.com/mapbox/mapbox-gl-native/blob/master/circle.yml
 commands:
-  install_garden:
-    description: Installs the Garden CLI and its dependencies
-    steps:
-      - run:
-          name: Install Garden dependencies
-          command: |
-            sudo apt-get update && sudo apt-get install rsync
-            mkdir $HOME/kubectl
-            curl -L -o $HOME/kubectl/kubectl "https://storage.googleapis.com/kubernetes-release/release/v1.11.3/bin/linux/amd64/kubectl"
-            chmod +x $HOME/kubectl/kubectl
-      - run:
-          name: Install the Garden CLI
-          command: |
-            mkdir $HOME/garden
-            curl -L https://github.com/garden-io/garden/releases/download/v0.9.6/garden-v0.9.6-linux-amd64.tar.gz | tar xvz -C $HOME/garden --strip-components=1
-      - run:
-          name: Add Garden and Kubectl to the CircleCI agent path
-          command: |
-            echo 'export PATH=$HOME/garden:$PATH' >> $BASH_ENV
-            echo 'export PATH=$HOME/kubectl:$PATH' >> $BASH_ENV
-
+  # This step will depend on how you've set up your remote cluster
   configure_kubectl_context:
-    description: Configure the kubectl context so that we can access our remote cluster
+    description: Configure the kubectl context so that we can access our remote cluster.
     steps:
       - run:
           name: Install GCloud
@@ -44,9 +24,7 @@ commands:
             mkdir $HOME/gcloud
             curl https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz | tar xvz -C $HOME/gcloud
             $HOME/gcloud/google-cloud-sdk/install.sh --quiet
-      - run:
-          name: Add GCloud to the CircleCI path
-          command: echo 'export PATH=$HOME/gcloud/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=$HOME/gcloud/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
       - run:
           name: Configure kubectl context via gloud
           command: |
@@ -54,7 +32,6 @@ commands:
             echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project $GOOGLE_PROJECT_ID && gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE
             gcloud --quiet container clusters get-credentials $GOOGLE_CLUSTER_ID --zone $GOOGLE_COMPUTE_ZONE
-            gcloud --quiet auth configure-docker
 
 #
 # Jobs section
@@ -64,9 +41,6 @@ jobs:
     <<: *image-config
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - install_garden
       - configure_kubectl_context
       - run:
           name: Test project
@@ -78,9 +52,6 @@ jobs:
     <<: *image-config
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - install_garden
       - configure_kubectl_context
       - run:
           name: Test project
