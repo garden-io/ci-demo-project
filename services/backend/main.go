@@ -10,8 +10,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/hello-go", handler)
+	http.HandleFunc("/hello-backend", handler)
 	fmt.Println("Server running...")
 
-	http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		panic(err)
+	}
 }
