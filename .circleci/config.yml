@@ -8,7 +8,7 @@ version: 2.1
   # Configuration for our Garden jobs
   image-config: &image-config
     docker:
-      - image: gardendev/garden:v0.10.0-0
+      - image: gardendev/garden:0.12.43
 
 # Reuseable commands to execute in jobs
 # see https://circleci.com/docs/2.0/configuration-reference/#commands-requires-version21
